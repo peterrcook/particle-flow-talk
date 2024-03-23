@@ -27,7 +27,7 @@ function distanceBetweenPts(x0, y0, x1, y1) {
 function initSeeds() {
     let speed = 70;
     seeds = [];
-    for(let i=0; i<10; i++) {
+    for(let i=0; i<20; i++) {
         seeds.push({
             x: Math.random() * w,
             y: Math.random() * h,
@@ -42,10 +42,10 @@ function updateField() {
     field = [];
 
     for(let x = 0; x < w; x++) {
-        field.push([]);
+        field[x] = [];
 
         for(let y = 0; y < h; y++) {
-            field[x].push([0, 0]);
+            field[x][y] = {x: 0, y: 0};
 
             // Loop through seeds and sum the velocities
             for(let i = 0; i < seeds.length; i++) {
@@ -54,12 +54,10 @@ function updateField() {
                 // Compute distance from seed to [x,y]
                 let dis = distanceBetweenPts(seed.x, seed.y, x, y);
 
-                // Skip this seed if point is outside seed's radius of influence
-                if(dis > seedRadius) continue;
+                if(dis > seedRadius) continue; // Skip if [x, y] is outside seed's radius of influence
 
-                // seed.vx and seed.vy are pixels per second
-                field[x][y][0] += seed.vx * (1 - dis/seedRadius);
-                field[x][y][1] += seed.vy * (1 - dis/seedRadius);
+                field[x][y].x += seed.vx * (1 - dis/seedRadius);
+                field[x][y].y += seed.vy * (1 - dis/seedRadius);
             }
         }
     }
@@ -70,8 +68,9 @@ function updateField() {
 // Rendering
 // ---------
 function drawSeeds() {
+    ctx.fillStyle = 'red';
+    ctx.strokeStyle = 'red';
     for(let i=0; i<seeds.length; i++) {
-        ctx.fillStyle = "red";
         let s = seeds[i];
         ctx.fillRect(s.x - 3, s.y - 3, 6, 6);
         ctx.beginPath();
@@ -96,7 +95,7 @@ function drawField() {
             // Compute and draw a line that represents the velocity
             let scale = 0.4;
             let p0 = {x: x, y: y};
-            let p1 = {x: x + scale * v[0], y: y + scale * v[1]};
+            let p1 = {x: x + scale * v.x, y: y + scale * v.y};
 
             ctx.beginPath();
             ctx.moveTo(p0.x, p0.y);

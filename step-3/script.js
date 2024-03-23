@@ -56,10 +56,10 @@ function updateField() {
     field = [];
 
     for(let x = 0; x < w; x++) {
-        field.push([]);
+        field[x] = [];
 
         for(let y = 0; y < h; y++) {
-            field[x].push([0, 0]);
+            field[x][y] = {x: 0, y: 0};
 
             // Loop through seeds and sum the velocities
             for(let i = 0; i < seeds.length; i++) {
@@ -68,12 +68,10 @@ function updateField() {
                 // Compute distance from seed to [x,y]
                 let dis = distanceBetweenPts(seed.x, seed.y, x, y);
 
-                // Skip this seed if point is outside seed's radius of influence
-                if(dis > seedRadius) continue;
+                if(dis > seedRadius) continue; // Skip if [x, y] is outside seed's radius of influence
 
-                // seed.vx and seed.vy are pixels per second
-                field[x][y][0] += seed.vx * (1 - dis/seedRadius);
-                field[x][y][1] += seed.vy * (1 - dis/seedRadius);
+                field[x][y].x += seed.vx * (1 - dis/seedRadius);
+                field[x][y].y += seed.vy * (1 - dis/seedRadius);
             }
         }
     }
@@ -84,11 +82,11 @@ function updateField() {
 // Rendering
 // ---------
 function drawSeeds() {
+    ctx.fillStyle = 'red';
+    ctx.strokeStyle = 'red';
     for(let i=0; i<seeds.length; i++) {
-        ctx.fillStyle = "red";
         let s = seeds[i];
         drawPoint(s.x, s.y, 6);
-        // ctx.fillRect(s.x - 3, s.y - 3, 6, 6);
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x + s.vx, s.y + s.vy);
@@ -107,12 +105,11 @@ function drawField() {
 
             // Draw a small square at the point
             drawPoint(x, y, 3);
-            // ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
 
             // Compute and draw a line that represents the velocity
             let scale = 0.5;
             let p0 = {x: x, y: y};
-            let p1 = {x: x + scale * v[0], y: y + scale * v[1]};
+            let p1 = {x: x + scale * v.x, y: y + scale * v.y};
 
             ctx.beginPath();
             ctx.moveTo(p0.x, p0.y);
@@ -139,15 +136,11 @@ function step() {
     let y = Math.floor(particle.y);
     let velocity = field[x][y];
 
-    particle.x = particle.x + t * velocity[0];
-    particle.y = particle.y + t * velocity[1];
+    particle.x = particle.x + t * velocity.x;
+    particle.y = particle.y + t * velocity.y;
 
-    var isZeroVelocity = velocity[0] === 0 && velocity[1] === 0;
-    var isOutOfBounds = particle.x < 0 || particle.x >= w || particle.y < 0 || particle.y >= h;
-
-    if(isZeroVelocity || isOutOfBounds) {
-        particle = getRandomPoint(w, h);
-    }
+    let isOutOfBounds = particle.x < 0 || particle.x >= w || particle.y < 0 || particle.y >= h;
+    if(isOutOfBounds) particle = getRandomPoint(w, h);
 
     drawParticle();
 }

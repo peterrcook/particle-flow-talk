@@ -1,11 +1,11 @@
 // Canvas variables
-let w = 800, h = 600;
+let w = 1200, h = 800;
 let canvas = document.getElementById('canvas');
 let ctx = canvas.getContext('2d');
 
 // Settings
-var isRunning = true;   // indicates whether animation is running
-var showSeeds = false;  // indicates whether to draw the seeds
+let isRunning = true;   // indicates whether animation is running
+let showSeeds = false;  // indicates whether to draw the seeds
 
 // Time of previous animation frame
 let previousTime;
@@ -18,9 +18,9 @@ let seeds = [];
 let seedRadius = 300; // radius of influence
 
 // Particles
-var particles = [];
-var numParticles = 1000;
-let maxParticleAge = 100;
+let particles = [];
+let numParticles = 1500;
+let maxParticleAge = 150;
 
 
 // ----------------
@@ -31,10 +31,6 @@ function distanceBetweenPts(x0, y0, x1, y1) {
     let dy = y0 - y1;
     return Math.sqrt(dx * dx + dy * dy);
 }
-
-// function getSpeed(v0, v1) {
-//     return Math.sqrt(v0 * v0 - v1 * v1);
-// }
 
 function getRandomPoint(w, h) {
     return {
@@ -48,32 +44,13 @@ function drawPoint(x, y, size) {
 }
 
 
-// --------------
-// Event handlers
-// --------------
-function toggleIsRunning() {
-    if(isRunning) {
-        isRunning = false;
-    }
-    else {
-        isRunning = true;
-        previousTime = document.timeline.currentTime;
-        window.requestAnimationFrame(step);
-    }
-}
-
-function toggleShowSeeds() {
-  showSeeds = !showSeeds;
-}
-
-
 // ---------------
 // Field functions
 // ---------------
 function initSeeds() {
     let speed = 70;
     seeds = [];
-    for(let i=0; i<10; i++) {
+    for(let i=0; i<20; i++) {
         seeds.push({
             x: Math.random() * w,
             y: Math.random() * h,
@@ -88,10 +65,10 @@ function updateField() {
     field = [];
 
     for(let x = 0; x < w; x++) {
-        field.push([]);
+        field[x] = [];
 
         for(let y = 0; y < h; y++) {
-            field[x].push([0, 0]);
+            field[x][y] = {x: 0, y: 0};
 
             // Loop through seeds and sum the velocities
             for(let i = 0; i < seeds.length; i++) {
@@ -100,12 +77,10 @@ function updateField() {
                 // Compute distance from seed to [x,y]
                 let dis = distanceBetweenPts(seed.x, seed.y, x, y);
 
-                // Skip this seed if point is outside seed's radius of influence
-                if(dis > seedRadius) continue;
+                if(dis > seedRadius) continue; // Skip if [x, y] is outside seed's radius of influence
 
-                // seed.vx and seed.vy are pixels per second
-                field[x][y][0] += seed.vx * (1 - dis/seedRadius);
-                field[x][y][1] += seed.vy * (1 - dis/seedRadius);
+                field[x][y].x += seed.vx * (1 - dis/seedRadius);
+                field[x][y].y += seed.vy * (1 - dis/seedRadius);
             }
         }
     }
@@ -116,8 +91,8 @@ function updateField() {
 // Particle functions
 // ------------------
 function initParticles() {
-    for(var i=0; i<numParticles; i++) {
-        var pt = getRandomPoint(w, h);
+    for(let i=0; i<numParticles; i++) {
+        let pt = getRandomPoint(w, h);
         particles.push({
             prevX: pt.x,
             prevY: pt.y,
@@ -142,8 +117,8 @@ function updateParticles(timeDelta) {
         let y = Math.floor(p.y);
         let v = field[x][y];
 
-        p.x = p.x + timeDelta * v[0];
-        p.y = p.y + timeDelta * v[1];
+        p.x = p.x + timeDelta * v.x;
+        p.y = p.y + timeDelta * v.y;
 
         // let isOld = false;
         let isOld = p.age > maxParticleAge;
@@ -161,31 +136,20 @@ function updateParticles(timeDelta) {
 // ---------
 // Rendering
 // ---------
-function drawSeeds() {
-    for(let i=0; i<seeds.length; i++) {
-        ctx.fillStyle = "red";
-        let s = seeds[i];
-        drawPoint(s.x, s.y, 6);
-        ctx.beginPath();
-        ctx.moveTo(s.x, s.y);
-        ctx.lineTo(s.x + s.vx, s.y + s.vy);
-        ctx.stroke();
-    }
-}
-
 function fadeCanvas() {
-    ctx.save();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.01)';
+    // ctx.fillStyle = 'rgba(0, 0, 0, 0.03)'; // Dark theme
     ctx.fillRect(0, 0, w, h);
-    ctx.restore();
 }
 
 function drawParticles() {
     fadeCanvas();
 
     ctx.strokeStyle = '#333';
-    for(var i=0; i<numParticles; i++) {
-        var p = particles[i];
+    // ctx.strokeStyle = '#fff'; // Dark theme
+    ctx.lineWidth = 1;
+    for(let i=0; i<numParticles; i++) {
+        let p = particles[i];
 
         ctx.beginPath();
         ctx.moveTo(p.prevX, p.prevY);
@@ -198,24 +162,16 @@ function drawParticles() {
 // ---------
 // Animation
 // ---------
-function step(currentTime) {
-    if(!previousTime) {
-        previousTime = currentTime;
-    }
+function step(t) {
+    if(!previousTime) previousTime = t;
 
-    var timeDelta = currentTime - previousTime;
+    let timeDelta = t - previousTime;
     timeDelta = timeDelta / 1000; // convert from milliseconds to seconds
     
-    if(isRunning) {
-        if(showSeeds) {
-          drawSeeds();
-        }
-        updateParticles(timeDelta);
-        drawParticles();
-        window.requestAnimationFrame(step);
-        previousTime = currentTime;
-    }
-
+    updateParticles(timeDelta);
+    drawParticles();
+    window.requestAnimationFrame(step);
+    previousTime = t;
 }
 
 function go() {
