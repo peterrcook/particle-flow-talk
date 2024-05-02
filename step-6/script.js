@@ -19,8 +19,8 @@ let seedRadius = 300; // radius of influence
 
 // Particles
 let particles = [];
-let numParticles = 1500;
-let maxParticleAge = 150;
+let numParticles = 2500;
+let maxParticleAge = 100;
 
 
 // ----------------
@@ -48,7 +48,7 @@ function drawPoint(x, y, size) {
 // Field functions
 // ---------------
 function initSeeds() {
-    let speed = 70;
+    let speed = 200;
     seeds = [];
     for(let i=0; i<20; i++) {
         seeds.push({
