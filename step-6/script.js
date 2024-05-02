@@ -86,6 +86,24 @@ function updateField() {
     }
 }
 
+// function updateField() {
+//     for(let x = 0; x < w; x++) {
+//         field[x] = [];
+//         for(let y = 0; y < h; y++) {
+//             field[x][y] = {x: y - 0.5 * h, y: -x + 0.5 * w};
+//         }
+//     }
+// }
+
+// function updateField() {
+//     for(let x = 0; x < w; x++) {
+//         field[x] = [];
+//         for(let y = 0; y < h; y++) {
+//             field[x][y] = {x: 100 * Math.sin(0.01 * y), y: 40 * Math.sin(0.01 * x)};
+//         }
+//     }
+// }
+
 
 // ------------------
 // Particle functions
