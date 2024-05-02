@@ -122,14 +122,12 @@ function drawParticle() {
 // Animation
 // ---------
 function step() {
-    let timestep = 0.5; // timestep in seconds
-
     let x = Math.floor(particle.x);
     let y = Math.floor(particle.y);
     let velocity = field[x][y];
 
-    particle.x = particle.x + timestep * velocity.x;
-    particle.y = particle.y + timestep * velocity.y;
+    particle.x = particle.x + velocity.x;
+    particle.y = particle.y + velocity.y;
 
     drawParticle();
 }

@@ -129,15 +129,12 @@ function drawParticle() {
 // Animation
 // ---------
 function step() {
-    // timestep in seconds
-    let t = 0.5;
-
     let x = Math.floor(particle.x);
     let y = Math.floor(particle.y);
     let velocity = field[x][y];
 
-    particle.x = particle.x + t * velocity.x;
-    particle.y = particle.y + t * velocity.y;
+    particle.x = particle.x + velocity.x;
+    particle.y = particle.y + velocity.y;
 
     let isOutOfBounds = particle.x < 0 || particle.x >= w || particle.y < 0 || particle.y >= h;
     if(isOutOfBounds) particle = getRandomPoint(w, h);
